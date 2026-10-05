@@ -3,7 +3,9 @@ import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
 
-const DB_PATH = path.join(process.cwd(), 'euphoria.db');
+const DB_PATH = process.env.VERCEL
+  ? path.join('/tmp', 'euphoria.db')
+  : path.join(process.cwd(), 'euphoria.db');
 
 let db: Database.Database;
 
