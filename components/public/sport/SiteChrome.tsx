@@ -52,7 +52,7 @@ export default function SiteChrome({ contact, social = [], children }: { contact
         <div className="eh-nav-cta">
           <Link className="eh-btn eh-nav-book" href="/booking" aria-label="Book appointment">
             <span className="eh-nav-book-label">BOOK APPOINTMENT</span>
-            <span className="eh-nav-book-short" aria-hidden="true">BOOK</span>
+            <span className="eh-nav-book-short" aria-hidden="true">BOOK NOW</span>
             <ArrowRight size={15} aria-hidden="true" />
           </Link>
           <button

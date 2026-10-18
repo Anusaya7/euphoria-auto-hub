@@ -62,7 +62,7 @@ body {
   background-color: var(--black);
   color: var(--white);
   line-height: 1.6;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 img {
