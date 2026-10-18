@@ -128,6 +128,11 @@ function initializeDatabase(db: Database.Database) {
       related_id TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS app_migrations (
+      name TEXT PRIMARY KEY,
+      applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   const galleryColumns = db.prepare('PRAGMA table_info(gallery_images)').all() as { name: string }[];
@@ -143,10 +148,102 @@ function initializeDatabase(db: Database.Database) {
     db.exec('ALTER TABLE enquiries ADD COLUMN is_read INTEGER NOT NULL DEFAULT 0');
   }
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS bookings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      booking_code TEXT UNIQUE,
+      service_name TEXT,
+      vehicle_type TEXT,
+      booking_date TEXT,
+      booking_time TEXT,
+      name TEXT,
+      phone TEXT,
+      email TEXT,
+      vehicle_make TEXT,
+      vehicle_model TEXT,
+      registration_number TEXT,
+      notes TEXT,
+      status TEXT DEFAULT 'Pending',
+      source TEXT DEFAULT 'website',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS leads (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      phone TEXT,
+      email TEXT,
+      service TEXT,
+      source TEXT,
+      message TEXT,
+      status TEXT DEFAULT 'Pending',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  addColumn(db, 'services', 'duration', 'duration TEXT');
+  addColumn(db, 'services', 'price', 'price TEXT');
+  addColumn(db, 'services', 'show_price', 'show_price INTEGER NOT NULL DEFAULT 0');
+  addColumn(db, 'services', 'benefits', 'benefits TEXT');
+  addColumn(db, 'testimonials', 'service_name', 'service_name TEXT');
+  addColumn(db, 'testimonials', 'is_verified', 'is_verified INTEGER NOT NULL DEFAULT 0');
+  addColumn(db, 'testimonials', 'display_order', 'display_order INTEGER NOT NULL DEFAULT 0');
+  addColumn(db, 'contact_settings', 'business_name', 'business_name TEXT');
+  addColumn(db, 'contact_settings', 'maps_embed', 'maps_embed TEXT');
+  addColumn(db, 'contact_settings', 'copyright_text', 'copyright_text TEXT');
+  addColumn(db, 'contact_settings', 'logo', 'logo TEXT');
+  addColumn(db, 'contact_settings', 'favicon', 'favicon TEXT');
+  addColumn(db, 'contact_settings', 'default_cta', 'default_cta TEXT');
+  addColumn(db, 'leads', 'vehicle', 'vehicle TEXT');
+  addColumn(db, 'leads', 'preferred_date', 'preferred_date TEXT');
+  addColumn(db, 'leads', 'preferred_time', 'preferred_time TEXT');
+  addColumn(db, 'admin_users', 'reset_hash', 'reset_hash TEXT');
+  addColumn(db, 'admin_users', 'reset_expires', 'reset_expires TEXT');
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS packages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      short_description TEXT,
+      included TEXT,
+      benefits TEXT,
+      price TEXT,
+      show_price INTEGER NOT NULL DEFAULT 0,
+      cta TEXT,
+      cta_link TEXT,
+      is_featured INTEGER NOT NULL DEFAULT 0,
+      display_order INTEGER NOT NULL DEFAULT 0,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS faqs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      question TEXT NOT NULL,
+      answer TEXT NOT NULL,
+      category TEXT DEFAULT 'General',
+      display_order INTEGER NOT NULL DEFAULT 0,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS before_after (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      description TEXT,
+      category TEXT,
+      before_image TEXT,
+      after_image TEXT,
+      display_order INTEGER NOT NULL DEFAULT 0,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
   const insertSocial = db.prepare('INSERT OR IGNORE INTO social_links (platform, display_name, url, enabled, display_order) VALUES (?, ?, ?, 0, ?)');
   insertSocial.run('instagram', 'Instagram', '', 1);
-  insertSocial.run('youtube', 'YouTube', '', 2);
-  insertSocial.run('facebook', 'Facebook', '', 3);
+  insertSocial.run('facebook', 'Facebook', '', 2);
+  insertSocial.run('youtube', 'YouTube', '', 3);
+  insertSocial.run('google', 'Google Business Profile', '', 4);
+  insertSocial.run('linkedin', 'LinkedIn', '', 5);
+  insertSocial.run('x', 'X', '', 6);
 
   const adminColumns = db.prepare('PRAGMA table_info(admin_users)').all() as { name: string }[];
   if (!adminColumns.some((column) => column.name === 'token_version')) {
@@ -155,6 +252,72 @@ function initializeDatabase(db: Database.Database) {
 
   seedDatabase(db);
   ensureSiteContent(db);
+  seedManagedContent(db);
+  removeSeedPortfolioExamples(db);
+}
+
+function addColumn(db: Database.Database, table: string, name: string, definition: string) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!columns.some((column) => column.name === name)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${definition}`);
+  }
+}
+
+function seedManagedContent(db: Database.Database) {
+  const packageCount = db.prepare('SELECT COUNT(*) as c FROM packages').get() as { c: number };
+  if (!packageCount.c) {
+    const insert = db.prepare('INSERT INTO packages (name, short_description, cta, cta_link, display_order, is_active, show_price) VALUES (?, ?, ?, ?, ?, 1, 0)');
+    [
+      ['Essential', 'Premium exterior care for a car that needs a proper clean and finish.', 'Get a quote', '/contact', 1],
+      ['Performance', 'Exterior and interior detailing for a cabin and body that both feel finished.', 'Get a quote', '/contact', 2],
+      ['Protection', 'Detailing paired with a protection conversation: ceramic, graphene, or film.', 'Get a quote', '/contact', 3],
+      ['Ultimate', 'A full plan across wash, correction, protection, and wrap if that is what the car needs.', 'Get a quote', '/contact', 4],
+    ].forEach((row) => insert.run(...row));
+  }
+  const faqCount = db.prepare('SELECT COUNT(*) as c FROM faqs').get() as { c: number };
+  if (!faqCount.c) {
+    const insert = db.prepare('INSERT INTO faqs (question, answer, category, display_order, is_active) VALUES (?, ?, ?, ?, 1)');
+    [
+      ['Where is Euphoria Auto Hub?', 'The studio is at MNO 30/2, near Ganpati Mandir, next to the True Value showroom, Bavdhan, Pune 411021.', 'Location', 1],
+      ['What are the opening hours?', 'The studio is open from 9:00 AM to 7:00 PM.', 'Hours', 2],
+      ['Do you publish prices online?', 'Prices depend on the vehicle and the condition of the paint or interior. Ask the team for a quote on WhatsApp or by phone.', 'Pricing', 3],
+      ['Which areas do you serve?', 'The studio is in Bavdhan. Owners also visit from nearby Pune areas including Kothrud, Warje, Baner, Aundh, Pashan, and Paud Road.', 'Service area', 4],
+    ].forEach((row) => insert.run(...row));
+  }
+}
+
+function removeSeedPortfolioExamples(db: Database.Database) {
+  const migrationName = 'remove-seeded-portfolio-examples-v2';
+  if (db.prepare('SELECT name FROM app_migrations WHERE name = ?').get(migrationName)) return;
+
+  const removeExamples = db.transaction(() => {
+    db.prepare('DELETE FROM testimonials WHERE customer_name = ? AND review = ? AND rating = 5 AND is_verified = 0').run(
+      'Anil Misale',
+      'The foam wash and detailing were exceptional! My car looks brand new after their amazing service.',
+    );
+    db.prepare('DELETE FROM before_after WHERE title = ? AND description = ? AND before_image = ? AND after_image = ?').run(
+      'Studio photographs',
+      'These are studio photographs of a wash and a finished car. They are not presented as one customer’s before-and-after pair.',
+      '/images/service-car-wash.jpg',
+      '/images/hero-car.jpg',
+    );
+
+    const seededGallery = [
+      ['Premium Foam Wash', 'Car Wash', '/images/service-car-wash.jpg', 'Premium foam wash at Euphoria Auto Hub, Pune'],
+      ['Ceramic Coating', 'Ceramic', '/images/service-ceramic.jpg', 'Ceramic coating at Euphoria Auto Hub, Pune'],
+      ['PPF Installation', 'PPF', '/images/service-ppf.jpg', 'Paint protection film at Euphoria Auto Hub, Pune'],
+      ['Interior Detailing', 'Interior', '/images/service-detailing.jpg', 'Interior detailing at Euphoria Auto Hub, Pune'],
+      ['Matte Wrap', 'Wraps', '/images/service-wrap.jpg', 'Vehicle wrap at Euphoria Auto Hub, Pune'],
+      ['Machine Polishing', 'Polishing', '/images/service-polishing.jpg', 'Machine polishing at Euphoria Auto Hub, Pune'],
+      ['Graphene Coating', 'Graphene', '/images/service-ceramic.jpg', 'Graphene coating at Euphoria Auto Hub, Pune'],
+      ['Exterior Detail', 'Detailing', '/images/hero-car.jpg', 'Exterior detail at Euphoria Auto Hub, Pune'],
+    ];
+    const deleteGalleryExample = db.prepare('DELETE FROM gallery_images WHERE title = ? AND category = ? AND image_url = ?');
+    seededGallery.forEach((item) => deleteGalleryExample.run(item[0], item[1], item[2]));
+    db.prepare('INSERT INTO app_migrations (name) VALUES (?)').run(migrationName);
+  });
+
+  removeExamples();
 }
 
 function seedDatabase(db: Database.Database) {
@@ -204,15 +367,6 @@ function seedDatabase(db: Database.Database) {
     services.forEach(s => insertService.run(s));
   }
 
-  const testimonialCount = db.prepare('SELECT COUNT(*) as c FROM testimonials').get() as { c: number };
-  if (testimonialCount.c === 0) {
-    db.prepare('INSERT INTO testimonials (customer_name, review, rating, is_active) VALUES (?, ?, ?, ?)').run(
-      'Anil Misale',
-      'The foam wash and detailing were exceptional! My car looks brand new after their amazing service.',
-      5, 1
-    );
-  }
-
   const heroExists = db.prepare('SELECT id FROM homepage_content WHERE section = ?').get('hero');
   if (!heroExists) {
     const sections = [
@@ -225,21 +379,6 @@ function seedDatabase(db: Database.Database) {
     sections.forEach(s => insertSection.run(s));
   }
 
-  const galleryCount = db.prepare('SELECT COUNT(*) as c FROM gallery_images').get() as { c: number };
-  if (galleryCount.c === 0) {
-    const items = [
-      { title: 'Premium Foam Wash', category: 'Car Wash', image_url: '/images/service-car-wash.jpg', alt_text: 'Premium foam wash at Euphoria Auto Hub, Pune', display_order: 1 },
-      { title: 'Ceramic Coating', category: 'Ceramic', image_url: '/images/service-ceramic.jpg', alt_text: 'Ceramic coating at Euphoria Auto Hub, Pune', display_order: 2 },
-      { title: 'PPF Installation', category: 'PPF', image_url: '/images/service-ppf.jpg', alt_text: 'Paint protection film at Euphoria Auto Hub, Pune', display_order: 3 },
-      { title: 'Interior Detailing', category: 'Interior', image_url: '/images/service-detailing.jpg', alt_text: 'Interior detailing at Euphoria Auto Hub, Pune', display_order: 4 },
-      { title: 'Matte Wrap', category: 'Wraps', image_url: '/images/service-wrap.jpg', alt_text: 'Vehicle wrap at Euphoria Auto Hub, Pune', display_order: 5 },
-      { title: 'Machine Polishing', category: 'Polishing', image_url: '/images/service-polishing.jpg', alt_text: 'Machine polishing at Euphoria Auto Hub, Pune', display_order: 6 },
-      { title: 'Graphene Coating', category: 'Graphene', image_url: '/images/service-ceramic.jpg', alt_text: 'Graphene coating at Euphoria Auto Hub, Pune', display_order: 7 },
-      { title: 'Exterior Detail', category: 'Detailing', image_url: '/images/hero-car.jpg', alt_text: 'Exterior detail at Euphoria Auto Hub, Pune', display_order: 8 },
-    ];
-    const insertGallery = db.prepare('INSERT INTO gallery_images (title, category, image_url, alt_text, display_order) VALUES (@title, @category, @image_url, @alt_text, @display_order)');
-    items.forEach(g => insertGallery.run(g));
-  }
 }
 
 const GALLERY_FILE_REPAIRS: Record<string, { url: string; category: string }> = {
@@ -383,15 +522,23 @@ function refreshLaunchCopy(db: Database.Database) {
   };
 
   const hero = read('hero');
-  if (hero && (hero.heading === "Your Car's Best Friend" || hero.heading === 'Your Car’s Best Friend')) {
+  const oldHero = new Set(["Your Car's Best Friend", 'Your Car’s Best Friend', 'Premium Care.\nExceptional Finish.', 'Premium Care. Exceptional Finish.']);
+  if (hero && oldHero.has(String(hero.heading || ''))) {
     write('hero', {
       ...hero,
-      label: 'EUPHORIA AUTO HUB',
-      heading: 'Premium Care.\nExceptional Finish.',
-      subheading: 'Car Wash • Ceramic Coating • Graphene Coating • Paint Protection • Detailing • Wraps',
-      description: hero.description || 'Professional car detailing, paint protection and premium automotive care designed to keep your vehicle looking its absolute best.',
-      cta_primary: hero.cta_primary || 'Book Your Service',
-      cta_secondary: hero.cta_secondary || 'Explore Services',
+      label: 'Euphoria Auto Hub · Premium automotive care in Pune',
+      heading: 'YOUR CAR DESERVES\nMORE THAN A WASH.',
+      subheading: 'Premium Automotive Care in Pune',
+      description: 'Premium detailing, ceramic and graphene coatings, PPF, wraps and professional car care — crafted for people who care about their cars.',
+      cta_primary: 'Book a service',
+      cta_primary_link: '/booking',
+      cta_secondary: 'WhatsApp us',
+      cta_secondary_link: 'whatsapp',
+      cta_tertiary: 'Explore services',
+      cta_tertiary_link: '/services',
+      enabled: true,
+      image: hero.image || '/images/hero-car.jpg',
+      image_alt: hero.image_alt || 'Finished car at Euphoria Auto Hub, Bavdhan',
     });
   }
 
@@ -408,12 +555,12 @@ function refreshLaunchCopy(db: Database.Database) {
   }
 
   const servicesIntro = read('services_intro');
-  if (servicesIntro && servicesIntro.heading === 'Our Services') {
+  if (servicesIntro && (servicesIntro.heading === 'Our Services' || servicesIntro.heading === 'Premium Care For Every Detail')) {
     write('services_intro', {
       ...servicesIntro,
       label: 'Services',
-      heading: 'Premium Care For Every Detail',
-      description: 'From deep cleaning to advanced surface protection, we treat every vehicle with precision.',
+      heading: 'BUILT TO MAKE YOUR CAR LOOK ITS BEST.',
+      description: 'Active services from the studio, shown in the order set in admin.',
     });
   }
 

@@ -15,8 +15,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const db = getDb();
     const current = db.prepare('SELECT show_on_home FROM testimonials WHERE id = ?').get(id) as { show_on_home?: number } | undefined;
     const showOnHome = body?.show_on_home === undefined ? (current?.show_on_home ?? 1) : (body.show_on_home ? 1 : 0);
-    const result = db.prepare('UPDATE testimonials SET customer_name=?, review=?, rating=?, image=?, is_active=?, show_on_home=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').run(
-      customer_name, review, rating, body?.image || '', body?.is_active ? 1 : 0, showOnHome, id
+    const result = db.prepare('UPDATE testimonials SET customer_name=?, review=?, rating=?, image=?, is_active=?, show_on_home=?, service_name=?, is_verified=?, display_order=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').run(
+      customer_name, review, rating, body?.image || '', body?.is_active ? 1 : 0, showOnHome,
+      String(body?.service_name || '').trim().slice(0, 80), body?.is_verified ? 1 : 0, Number(body?.display_order) || 0, id
     );
     if (result.changes === 0) return NextResponse.json({ error: 'Testimonial not found.' }, { status: 404 });
     return NextResponse.json({ success: true });

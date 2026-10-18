@@ -21,7 +21,7 @@ export function validateEnquiry(body: Record<string, unknown>) {
   return { first_name, last_name, email, mobile, message };
 }
 
-export const ENQUIRY_STATUSES = ['NEW', 'CONTACTED', 'IN PROGRESS', 'COMPLETED', 'CANCELLED', 'CLOSED'] as const;
+export const ENQUIRY_STATUSES = ['NEW', 'CONTACTED', 'CONVERTED', 'IN PROGRESS', 'COMPLETED', 'CANCELLED', 'CLOSED'] as const;
 
 export function isHttpsUrl(value: string) {
   try {

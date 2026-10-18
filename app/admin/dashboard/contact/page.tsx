@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react';
 import type { AlertState } from '@/lib/types';
 
 export default function ContactAdminPage() {
-  const [form, setForm] = useState({ phone: '', email: '', whatsapp: '', address: '', maps_url: '', hours: '' });
+  const [form, setForm] = useState({ phone: '', email: '', whatsapp: '', address: '', maps_url: '', hours: '', business_name: '', maps_embed: '', copyright_text: '', logo: '', favicon: '', default_cta: '' });
   const [alert, setAlert] = useState<AlertState>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/contact').then(r => r.json()).then(d => { if (d) setForm({ phone: d.phone || '', email: d.email || '', whatsapp: d.whatsapp || '', address: d.address || '', maps_url: d.maps_url || '', hours: d.hours || '' }); setLoading(false); });
+    fetch('/api/contact').then(r => r.json()).then(d => { if (d) setForm({ phone: d.phone || '', email: d.email || '', whatsapp: d.whatsapp || '', address: d.address || '', maps_url: d.maps_url || '', hours: d.hours || '', business_name: d.business_name || '', maps_embed: d.maps_embed || '', copyright_text: d.copyright_text || '', logo: d.logo || '', favicon: d.favicon || '', default_cta: d.default_cta || '' }); setLoading(false); });
   }, []);
 
   const showAlert = (type: 'success' | 'error', msg: string) => { setAlert({ type, msg }); setTimeout(() => setAlert(null), 3000); };
@@ -53,8 +53,24 @@ export default function ContactAdminPage() {
           <textarea className="admin-form-textarea" style={{ minHeight: 80 }} value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} placeholder="Mno 30/2, Euphoria Auto Hub, Pune, Bavdhan, Pune - 411021..." />
         </div>
         <div className="admin-form-group">
+          <label className="admin-form-label">Business name</label>
+          <input className="admin-form-input" value={form.business_name} onChange={e => setForm(p => ({ ...p, business_name: e.target.value }))} />
+        </div>
+        <div className="admin-form-group">
           <label className="admin-form-label">Google Maps URL</label>
           <input className="admin-form-input" value={form.maps_url} onChange={e => setForm(p => ({ ...p, maps_url: e.target.value }))} placeholder="https://maps.app.goo.gl/..." />
+        </div>
+        <div className="admin-form-group">
+          <label className="admin-form-label">Google Maps embed URL</label>
+          <input className="admin-form-input" value={form.maps_embed} onChange={e => setForm(p => ({ ...p, maps_embed: e.target.value }))} placeholder="https://" />
+        </div>
+        <div className="admin-form-group">
+          <label className="admin-form-label">Footer copyright</label>
+          <input className="admin-form-input" value={form.copyright_text} onChange={e => setForm(p => ({ ...p, copyright_text: e.target.value }))} />
+        </div>
+        <div className="admin-form-group">
+          <label className="admin-form-label">Default booking button</label>
+          <input className="admin-form-input" value={form.default_cta} onChange={e => setForm(p => ({ ...p, default_cta: e.target.value }))} />
         </div>
         <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
           <button className="admin-btn admin-btn-primary" onClick={handleSave}>Save Changes</button>

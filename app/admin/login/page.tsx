@@ -6,8 +6,11 @@ import Link from 'next/link';
 export default function AdminLoginPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [error, setError] = useState('');
+  const [forgot, setForgot] = useState('');
+  const [forgotNote, setForgotNote] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +66,7 @@ export default function AdminLoginPage() {
             <label className="admin-form-label" htmlFor="login-password">Password</label>
             <input
               id="login-password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               className="admin-form-input"
               placeholder="••••••••••"
               value={form.password}
@@ -72,6 +75,8 @@ export default function AdminLoginPage() {
               autoComplete="current-password"
             />
           </div>
+          <label className="admin-check"><input type="checkbox" checked={showPassword} onChange={(event) => setShowPassword(event.target.checked)} /> Show password</label>
+          <button type="button" onClick={() => setShowPassword((value) => !value)} style={{ background: 'transparent', color: 'var(--soft-grey)', border: 0, marginBottom: 8 }}>{showPassword ? 'Hide password' : 'Show password'}</button>
           <button
             id="login-submit"
             type="submit"
@@ -81,6 +86,17 @@ export default function AdminLoginPage() {
           >
             {status === 'loading' ? 'Signing in...' : 'Sign In'}
           </button>
+        </form>
+        <form style={{ marginTop: 16 }} onSubmit={async (event) => {
+          event.preventDefault();
+          const res = await fetch('/api/auth/forgot', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: forgot || form.email }) });
+          const body = await res.json().catch(() => ({}));
+          setForgotNote(body.message || 'Something went wrong. Please try again.');
+        }}>
+          <label className="admin-form-label" htmlFor="forgot-email">Forgot password</label>
+          <input id="forgot-email" type="email" className="admin-form-input" value={forgot} placeholder="Admin email" onChange={(event) => setForgot(event.target.value)} />
+          <button className="admin-btn admin-btn-secondary" type="submit" style={{ marginTop: 8 }}>Send reset link</button>
+          {forgotNote && <p style={{ color: 'var(--soft-grey)', marginTop: 8 }}>{forgotNote}</p>}
         </form>
         <div style={{ marginTop: 20, textAlign: 'center' }}>
           <Link href="/" style={{ fontSize: 13, color: 'var(--soft-grey)', textDecoration: 'none' }}>← Back to Website</Link>

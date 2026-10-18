@@ -4,7 +4,7 @@ import { getSessionFromRequest } from '@/lib/auth';
 import { recordNotification } from '@/lib/adminEvents';
 import { cleanText, isHttpsUrl } from '@/lib/validate';
 
-const PLATFORMS = ['instagram', 'youtube', 'facebook'] as const;
+const PLATFORMS = ['instagram', 'facebook', 'youtube', 'google', 'linkedin', 'x'] as const;
 
 export async function GET(req: NextRequest) {
   try {

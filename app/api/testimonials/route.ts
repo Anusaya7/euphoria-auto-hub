@@ -8,8 +8,8 @@ export async function GET(req: NextRequest) {
     const session = await getSessionFromRequest(req);
     const db = getDb();
     const testimonials = session
-      ? db.prepare('SELECT id, customer_name, review, rating, image, is_active, show_on_home, created_at FROM testimonials ORDER BY id DESC').all()
-      : db.prepare('SELECT id, customer_name, review, rating FROM testimonials WHERE is_active = 1 ORDER BY id DESC').all();
+      ? db.prepare('SELECT id, customer_name, review, rating, image, is_active, show_on_home, service_name, is_verified, display_order, created_at FROM testimonials ORDER BY display_order ASC, id DESC').all()
+      : db.prepare('SELECT id, customer_name, review, rating FROM testimonials WHERE is_active = 1 AND is_verified = 1 ORDER BY id DESC').all();
     return NextResponse.json(testimonials);
   } catch (error) {
     console.error('GET /api/testimonials error:', error);
@@ -27,8 +27,9 @@ export async function POST(req: NextRequest) {
     const rating = Math.min(5, Math.max(1, Number(body?.rating) || 5));
     if (!customer_name || !review) return NextResponse.json({ error: 'Name and review required' }, { status: 400 });
     const db = getDb();
-    const result = db.prepare('INSERT INTO testimonials (customer_name, review, rating, image, is_active, show_on_home) VALUES (?, ?, ?, ?, ?, ?)').run(
-      customer_name, review, rating, body?.image || '', body?.is_active ?? 1, body?.show_on_home === 0 ? 0 : 1
+    const result = db.prepare('INSERT INTO testimonials (customer_name, review, rating, image, is_active, show_on_home, service_name, is_verified, display_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(
+      customer_name, review, rating, body?.image || '', body?.is_active ?? 1, body?.show_on_home === 0 ? 0 : 1,
+      String(body?.service_name || '').trim().slice(0, 80), body?.is_verified ? 1 : 0, Number(body?.display_order) || 0,
     );
     recordNotification({ type: 'testimonial', title: 'New testimonial', message: `${customer_name} was added to testimonials.`, relatedId: Number(result.lastInsertRowid) });
     return NextResponse.json({ success: true, id: result.lastInsertRowid });

@@ -4,7 +4,13 @@ export type ContactInfo = {
   whatsapp?: string;
   address?: string;
   maps_url?: string;
+  maps_embed?: string;
   hours?: string;
+  business_name?: string;
+  copyright_text?: string;
+  logo?: string;
+  favicon?: string;
+  default_cta?: string;
 };
 
 export type Service = {
@@ -18,6 +24,10 @@ export type Service = {
   display_order: number;
   is_active: number;
   is_featured: number;
+  duration?: string;
+  price?: string;
+  show_price?: number;
+  benefits?: string;
 };
 
 export type GalleryImage = {
@@ -39,6 +49,9 @@ export type Testimonial = {
   image?: string;
   is_active?: number;
   show_on_home?: number;
+  service_name?: string;
+  is_verified?: number;
+  display_order?: number;
 };
 
 export type Enquiry = {
@@ -81,11 +94,15 @@ export type HomepageSection = {
   steps?: { number?: string; title?: string; description?: string; active?: boolean }[];
   cta_primary_link?: string;
   cta_secondary_link?: string;
+  cta_tertiary?: string;
+  cta_tertiary_link?: string;
   before_image?: string;
   after_image?: string;
   enabled?: boolean;
   items?: { number?: string; title?: string; text?: string }[];
 };
+
+export type PublicSocial = { platform: string; display_name: string; url: string };
 
 export type AlertState = { type: 'success' | 'error'; msg: string } | null;
 

@@ -52,6 +52,15 @@ export default function TestimonialsAdminPage() {
               <input className="admin-form-input" value={editing.customer_name || ''} onChange={e => setEditing((p) => ({ ...p, customer_name: e.target.value }))} placeholder="Customer name" />
             </div>
             <div className="admin-form-group">
+              <label className="admin-form-label">Service</label>
+              <input className="admin-form-input" value={editing.service_name || ''} onChange={e => setEditing((p) => ({ ...p, service_name: e.target.value }))} />
+            </div>
+            <div className="admin-form-group">
+              <label className="admin-form-label">Service</label>
+              <input className="admin-form-input" value={editing.service_name || ''} onChange={e => setEditing((p) => ({ ...p, service_name: e.target.value }))} />
+            </div>
+            <label className="admin-check"><input type="checkbox" checked={Boolean(editing.is_verified)} onChange={e => setEditing((p) => ({ ...p, is_verified: e.target.checked ? 1 : 0 }))} /> Verified review</label>
+            <div className="admin-form-group">
               <label className="admin-form-label">Review *</label>
               <textarea className="admin-form-textarea" value={editing.review || ''} onChange={e => setEditing((p) => ({ ...p, review: e.target.value }))} placeholder="Customer review..." />
             </div>

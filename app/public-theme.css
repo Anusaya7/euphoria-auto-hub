@@ -1,70 +1,43 @@
 :root,
-html[data-theme="light"] {
-  --ivory: #F7F4EE;
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --ivory: #FFFFFF;
   --paper: #FFFFFF;
-  --ink: #121212;
-  --muted: #6B6862;
-  --line: #E4DED3;
-  --gold: #C39A4A;
-  --gold-soft: #D8BD82;
-  --charcoal: #121212;
+  --ink: #141414;
+  --muted: #626873;
+  --line: #E1E4E8;
+  --gold: #D71920;
+  --gold-soft: #EF4444;
+  --charcoal: #141414;
 
-  --black: var(--ivory);
-  --black-2: var(--paper);
-  --graphite: #F3EFE7;
-  --dark-grey: var(--line);
-  --mid-grey: var(--muted);
-  --soft-grey: var(--muted);
-  --light-grey: var(--muted);
-  --silver: var(--ink);
-  --white: var(--ink);
-  --pure-white: var(--ink);
-  --red: var(--gold);
-  --red-deep: #8C6A2E;
-  --red-bright: var(--gold-soft);
-  --red-glow: rgba(195, 154, 74, 0.22);
-  --shadow-sm: 0 8px 24px rgba(18, 18, 18, 0.04);
-  --shadow-md: 0 18px 40px rgba(18, 18, 18, 0.08);
-  --shadow-lg: 0 28px 60px rgba(18, 18, 18, 0.12);
-  --shadow-red: 0 10px 24px rgba(195, 154, 74, 0.28);
-  --font-display: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
-  --font-heading: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  --black: #FFFFFF;
+  --black-2: #F4F5F7;
+  --graphite: #F4F5F7;
+  --dark-grey: #E1E4E8;
+  --mid-grey: #626873;
+  --soft-grey: #626873;
+  --light-grey: #626873;
+  --silver: #141414;
+  --white: #141414;
+  --pure-white: #FFFFFF;
+  --red: #D71920;
+  --red-deep: #B51219;
+  --red-bright: #EF4444;
+  --red-glow: rgba(215, 25, 32, 0.22);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 10px 24px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.09);
+  --shadow-red: 0 8px 24px rgba(215, 25, 32, 0.25);
+  --font-display: var(--font-grotesk), "Space Grotesk", sans-serif;
+  --font-heading: var(--font-grotesk), "Space Grotesk", sans-serif;
   --font-body: var(--font-inter), Inter, sans-serif;
   --nav-height: 78px;
-  --section-padding: 108px;
-  --section-padding-mobile: 72px;
+  --section-padding: 88px;
+  --section-padding-mobile: 60px;
   --container-max: 1240px;
-  --border-radius: 8px;
-  --border-radius-lg: 16px;
+  --border-radius: 10px;
+  --border-radius-lg: 14px;
   color-scheme: light;
-}
-
-html[data-theme="dark"] {
-  --ivory: #161616;
-  --paper: #1E1E1E;
-  --ink: #F7F4EE;
-  --muted: #C8C2B6;
-  --line: #34322E;
-  --gold: #C39A4A;
-  --gold-soft: #D8BD82;
-  --charcoal: #101010;
-  --black: var(--ivory);
-  --black-2: var(--paper);
-  --graphite: #242220;
-  --dark-grey: var(--line);
-  --mid-grey: var(--muted);
-  --soft-grey: var(--muted);
-  --light-grey: var(--muted);
-  --silver: var(--ink);
-  --white: var(--ink);
-  --pure-white: #121212;
-  --red: var(--gold);
-  --red-deep: var(--gold-soft);
-  --red-bright: var(--gold-soft);
-  --red-glow: rgba(195, 154, 74, 0.2);
-  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 18px 40px rgba(0, 0, 0, 0.32);
-  color-scheme: dark;
 }
 
 html, body {

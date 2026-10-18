@@ -110,7 +110,10 @@ export default function HomepageAdminPage() {
             <Field label="Primary link" value={hero.cta_primary_link} onChange={(v) => update('hero', 'cta_primary_link', v)} />
             <Field label="Secondary CTA" value={hero.cta_secondary} onChange={(v) => update('hero', 'cta_secondary', v)} />
             <Field label="Secondary link" value={hero.cta_secondary_link} onChange={(v) => update('hero', 'cta_secondary_link', v)} />
+            <Field label="Third CTA" value={hero.cta_tertiary} onChange={(v) => update('hero', 'cta_tertiary', v)} />
+            <Field label="Third link" value={hero.cta_tertiary_link} onChange={(v) => update('hero', 'cta_tertiary_link', v)} />
           </div>
+          <label className="admin-check"><input type="checkbox" checked={hero.enabled !== false} onChange={(e) => update('hero', 'enabled', e.target.checked)} /> Show hero</label>
           <Field label="Hero image alt text" value={hero.image_alt} onChange={(v) => update('hero', 'image_alt', v)} />
           <Field label="Hero image path" value={hero.image} onChange={(v) => update('hero', 'image', v)} />
           <Upload label="Upload hero image" uploading={uploading} onChange={(e) => handleUpload('hero', 'image', e)} />
@@ -214,7 +217,7 @@ export default function HomepageAdminPage() {
       )}
 
       {activeTab === 'trust' && (
-        <ListEditor section="trust" data={data} update={update} fields={['number', 'title']} addLabel="Add statistic" />
+        <ListEditor section="trust" data={data} update={update} fields={['title', 'text']} addLabel="Add trust item" />
       )}
       {activeTab === 'why' && (
         <ListEditor section="why" data={data} update={update} fields={['number', 'title', 'text']} addLabel="Add feature" />

@@ -13,9 +13,13 @@ interface Service {
   display_order: number;
   is_active: number;
   is_featured: number;
+  duration?: string;
+  price?: string;
+  show_price?: number;
+  benefits?: string;
 }
 
-const EMPTY: Partial<Service> = { name: '', slug: '', short_description: '', full_description: '', image: '', icon: '', display_order: 0, is_active: 1, is_featured: 0 };
+const EMPTY: Partial<Service> = { name: '', slug: '', short_description: '', full_description: '', image: '', icon: '', display_order: 0, is_active: 1, is_featured: 0, duration: '', price: '', show_price: 0, benefits: '' };
 
 export default function ServicesAdminPage() {
   const [services, setServices] = useState<Service[]>([]);
@@ -128,6 +132,21 @@ export default function ServicesAdminPage() {
               <label className="admin-form-label">Short Description</label>
               <input className="admin-form-input" value={editing.short_description || ''} onChange={e => setEditing(p => ({ ...p!, short_description: e.target.value }))} placeholder="Brief one-liner for service card" />
             </div>
+            <div className="admin-form-group">
+              <label className="admin-form-label">Benefits, one per line</label>
+              <textarea className="admin-form-textarea" value={editing.benefits || ''} onChange={e => setEditing(p => ({ ...p!, benefits: e.target.value }))} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="admin-form-group">
+                <label className="admin-form-label">Duration</label>
+                <input className="admin-form-input" value={editing.duration || ''} onChange={e => setEditing(p => ({ ...p!, duration: e.target.value }))} placeholder="Leave blank if unknown" />
+              </div>
+              <div className="admin-form-group">
+                <label className="admin-form-label">Price</label>
+                <input className="admin-form-input" value={editing.price || ''} onChange={e => setEditing(p => ({ ...p!, price: e.target.value }))} placeholder="Leave blank for Get a quote" />
+              </div>
+            </div>
+            <label className="admin-check"><input type="checkbox" checked={Boolean(editing.show_price)} onChange={e => setEditing(p => ({ ...p!, show_price: e.target.checked ? 1 : 0 }))} /> Show this price on the website</label>
             <div className="admin-form-group">
               <label className="admin-form-label">Full Description</label>
               <textarea className="admin-form-textarea" style={{ minHeight: 120 }} value={editing.full_description || ''} onChange={e => setEditing(p => ({ ...p!, full_description: e.target.value }))} placeholder="Detailed description..." />

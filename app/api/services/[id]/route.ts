@@ -36,7 +36,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!name || !slug) return NextResponse.json({ error: 'Name and a valid slug are required.' }, { status: 400 });
     if (image && !isStoredImage(image)) return NextResponse.json({ error: 'Service image must be a studio image path.' }, { status: 400 });
     const db = getDb();
-    const result = db.prepare('UPDATE services SET name=?, slug=?, short_description=?, full_description=?, image=?, icon=?, display_order=?, is_active=?, is_featured=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').run(
+    const result = db.prepare('UPDATE services SET name=?, slug=?, short_description=?, full_description=?, image=?, icon=?, display_order=?, is_active=?, is_featured=?, duration=?, price=?, show_price=?, benefits=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').run(
       name,
       slug,
       cleanText(body?.short_description, 400),
@@ -46,6 +46,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       Number(body?.display_order) || 0,
       body?.is_active ? 1 : 0,
       body?.is_featured ? 1 : 0,
+      cleanText(body?.duration, 80),
+      cleanText(body?.price, 40),
+      body?.show_price ? 1 : 0,
+      cleanText(body?.benefits, 1000),
       id
     );
     if (result.changes === 0) return NextResponse.json({ error: 'Service not found.' }, { status: 404 });

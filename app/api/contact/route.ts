@@ -24,17 +24,26 @@ export async function PUT(req: NextRequest) {
     const address = cleanText(body?.address, 300);
     const maps_url = cleanText(body?.maps_url, 300);
     const hours = cleanText(body?.hours, 120);
+    const business_name = cleanText(body?.business_name, 80);
+    const maps_embed = cleanText(body?.maps_embed, 500);
+    const copyright_text = cleanText(body?.copyright_text, 160);
+    const logo = cleanText(body?.logo, 300);
+    const favicon = cleanText(body?.favicon, 300);
+    const default_cta = cleanText(body?.default_cta, 80);
     if (!phone || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: 'A valid phone number and email are required.' }, { status: 400 });
     }
     if (maps_url && !/^https:\/\/[^\s]+$/i.test(maps_url)) {
       return NextResponse.json({ error: 'Maps link must be an https URL.' }, { status: 400 });
     }
+    if (maps_embed && !/^https:\/\/[^\s]+$/i.test(maps_embed)) {
+      return NextResponse.json({ error: 'Maps embed must be an https URL.' }, { status: 400 });
+    }
     const db = getDb();
     const existing = db.prepare('SELECT id FROM contact_settings LIMIT 1').get() as { id: number } | undefined;
     if (existing) {
-      db.prepare('UPDATE contact_settings SET phone=?, email=?, whatsapp=?, address=?, maps_url=?, hours=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').run(
-        phone, email, whatsapp, address, maps_url, hours, existing.id
+      db.prepare('UPDATE contact_settings SET phone=?, email=?, whatsapp=?, address=?, maps_url=?, hours=?, business_name=?, maps_embed=?, copyright_text=?, logo=?, favicon=?, default_cta=?, updated_at=CURRENT_TIMESTAMP WHERE id=?').run(
+        phone, email, whatsapp, address, maps_url, hours, business_name, maps_embed, copyright_text, logo, favicon, default_cta, existing.id
       );
     } else {
       db.prepare('INSERT INTO contact_settings (phone, email, whatsapp, address, maps_url, hours) VALUES (?, ?, ?, ?, ?, ?)').run(

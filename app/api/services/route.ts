@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     if (image && !isStoredImage(image)) return NextResponse.json({ error: 'Service image must be a studio image path.' }, { status: 400 });
 
     const db = getDb();
-    const result = db.prepare('INSERT INTO services (name, slug, short_description, full_description, image, icon, display_order, is_active, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(
+    const result = db.prepare('INSERT INTO services (name, slug, short_description, full_description, image, icon, display_order, is_active, is_featured, duration, price, show_price, benefits) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').run(
       name,
       slug,
       cleanText(body?.short_description, 400),
@@ -43,7 +43,11 @@ export async function POST(req: NextRequest) {
       cleanText(body?.icon, 40),
       Number(body?.display_order) || 0,
       body?.is_active ? 1 : 0,
-      body?.is_featured ? 1 : 0
+      body?.is_featured ? 1 : 0,
+      cleanText(body?.duration, 80),
+      cleanText(body?.price, 40),
+      body?.show_price ? 1 : 0,
+      cleanText(body?.benefits, 1000),
     );
 
     recordNotification({ type: 'service', title: 'Service added', message: `${name} was added.`, relatedId: Number(result.lastInsertRowid) });
